@@ -1,0 +1,15 @@
+FROM python:3.10-slim
+WORKDIR /app
+COPY scripts/protocols/tcp_client.py .
+COPY scripts/capture_metrics_live.py .
+COPY scripts/json_to_csv.py .
+COPY scripts/combine_metrics.py .
+COPY scripts/analyze_pcap.py .
+COPY scripts/apply_netem.py .
+ENV TCP_CONGESTION_CONTROL=cubic
+RUN apt-get update \
+	&& apt-get install -y iperf3 tcpdump iproute2 procps \
+	&& pip install --no-cache-dir scapy \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
+CMD ["/bin/sh", "-c", "sysctl -w net.ipv4.tcp_congestion_control=cubic && python3 apply_netem.py && python3 capture_metrics_live.py tcp eth0 5201 /results/cubic_client.pcap /results/cubic_client_metrics.json 'python3 tcp_client.py cubic_server' /results/cubic_client_timeline.csv /results/cubic_client_summary.csv && sleep 3 && python3 combine_metrics.py /results/cubic_client_metrics.json /results/cubic_server_metrics.json /results/cubic_combined_summary.csv"]

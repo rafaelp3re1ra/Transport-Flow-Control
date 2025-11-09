@@ -1,0 +1,126 @@
+
+services:
+  cubic_server:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.cubic_server
+    container_name: cubic_server
+    privileged: true
+    env_file:
+      - config.env
+    networks:
+      scenario1_net:
+        ipv4_address: 192.168.100.21
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./results:/results
+    profiles:
+      - cubic
+      - all
+
+  cubic_client:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.cubic_client
+    container_name: cubic_client
+    privileged: true
+    env_file:
+      - config.env
+    networks:
+      scenario1_net:
+        ipv4_address: 192.168.100.11
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./results:/results
+    depends_on:
+      - cubic_server
+    profiles:
+      - cubic
+      - all
+
+  bbr_server:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.bbr_server
+    container_name: bbr_server
+    privileged: true
+    env_file:
+      - config.env
+    networks:
+      scenario1_net:
+        ipv4_address: 192.168.100.22
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./results:/results
+    profiles:
+      - bbr
+      - all
+
+  bbr_client:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.bbr_client
+    container_name: bbr_client
+    privileged: true
+    env_file:
+      - config.env
+    networks:
+      scenario1_net:
+        ipv4_address: 192.168.100.12
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./results:/results
+    depends_on:
+      - bbr_server
+    profiles:
+      - bbr
+      - all
+
+  quic_server:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.quic_server
+    container_name: quic_server
+    env_file:
+      - config.env
+    networks:
+      scenario1_net:
+        ipv4_address: 192.168.100.23
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./results:/results
+    profiles:
+      - quic
+      - all
+
+  quic_client:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.quic_client
+    container_name: quic_client
+    env_file:
+      - config.env
+    networks:
+      scenario1_net:
+        ipv4_address: 192.168.100.13
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./results:/results
+    depends_on:
+      - quic_server
+    profiles:
+      - quic
+      - all
+
+networks:
+  scenario1_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24

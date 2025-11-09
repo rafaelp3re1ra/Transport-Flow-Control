@@ -1,0 +1,17 @@
+FROM python:3.10-slim
+WORKDIR /app
+COPY scripts/apply_netem.py .
+COPY scripts/protocols/quic_server.py .
+COPY scripts/capture_metrics_live.py .
+COPY scripts/json_to_csv.py .
+COPY scripts/analyze_pcap.py .
+RUN apt-get update \
+	&& apt-get install -y tcpdump iproute2 \
+	&& pip install --no-cache-dir scapy aioquic \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
+# Generate self-signed cert and key for QUIC
+RUN openssl req -x509 -newkey rsa:2048 -keyout /tmp/key.pem -out /tmp/cert.pem -days 1 -nodes -subj "/CN=localhost"
+# Create test file - size will be controlled by QUIC_DATA_SIZE_MB env var, default 5MB for compatibility
+RUN dd if=/dev/urandom of=/tmp/testfile.bin bs=1M count=10
+CMD ["/bin/sh", "-c", "python3 apply_netem.py && python3 capture_metrics_live.py udp eth0 443 /results/quic_server.pcap /results/quic_server_metrics.json 'python3 quic_server.py --run-server' /results/quic_server_timeline.csv /results/quic_server_summary.csv"]
