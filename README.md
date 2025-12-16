@@ -78,7 +78,13 @@ The project uses 6 Docker containers in an isolated bridge network:
 - **`analyze_pcap.py`**: PCAP file analysis and summary generation
 - **`apply_netem.py`**: Applies network conditions using tc netem
 - **`json_to_csv.py`**: Converts JSON metrics to CSV format
-- **`analyze_metrics.py`**: Advanced analysis and protocol comparison
+
+### Post-Processing Scripts
+
+Located in `scripts/post_processing/`:
+
+- **`analyze_metrics.py`**: Performs comprehensive analysis of protocol metrics including bandwidth stability assessment, identification of problematic seconds (high loss or jitter), and comparative ranking of protocols by performance metrics. Generates detailed summaries and exports comparison tables to CSV.
+- **`plot_comparison.py`**: Creates visual comparative plots of protocol performance metrics, helping to visualize differences in bandwidth, jitter, and loss across BBR, CUBIC, and QUIC protocols.
 
 ### Workflow
 
