@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to plot comparative graphs between BBR and CUBIC protocols
+Script to plot comparative graphs between BBR, CUBIC, and QUIC protocols
 """
 import argparse
 from pathlib import Path
@@ -43,7 +43,7 @@ def plot_comparison(results_dir: Path):
 
     # Create subplots
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
-    fig.suptitle('BBR vs CUBIC Comparison - Metrics per Second', fontsize=16)
+    fig.suptitle('BBR vs CUBIC vs QUIC Comparison - Metrics per Second', fontsize=16)
 
     # Bandwidth comparison
     ax1.plot(bbr_client['Second'], bbr_client['Bandwidth (Mbps)'], label='BBR Client', color='blue', alpha=0.7)
@@ -58,27 +58,23 @@ def plot_comparison(results_dir: Path):
     ax1.legend()
     ax1.grid(True, alpha=0.3)
 
-    # Packet Loss comparison
+    # Packet Loss comparison (TCP protocols only - QUIC handles reliability differently)
     ax2.plot(bbr_client['Second'], bbr_client['Loss (%)'], label='BBR Client', color='blue', alpha=0.7)
     ax2.plot(bbr_server['Second'], bbr_server['Loss (%)'], label='BBR Server', color='blue', linestyle='--', alpha=0.7)
     ax2.plot(cubic_client['Second'], cubic_client['Loss (%)'], label='CUBIC Client', color='red', alpha=0.7)
     ax2.plot(cubic_server['Second'], cubic_server['Loss (%)'], label='CUBIC Server', color='red', linestyle='--', alpha=0.7)
-    ax2.plot(quic_client['Second'], quic_client['Loss (%)'], label='QUIC Client', color='green', alpha=0.8)
-    ax2.plot(quic_server['Second'], quic_server['Loss (%)'], label='QUIC Server', color='green', linestyle='--', alpha=0.8)
-    ax2.set_title('Packet Loss (%)')
+    ax2.set_title('Packet Loss (%) - TCP Protocols')
     ax2.set_xlabel('Second')
     ax2.set_ylabel('%')
     ax2.legend()
     ax2.grid(True, alpha=0.3)
 
-    # Retransmissions comparison
+    # Retransmissions comparison (TCP protocols only - QUIC handles reliability differently)
     ax3.plot(bbr_client['Second'], bbr_client['Retransmissions'], label='BBR Client', color='blue', alpha=0.7)
     ax3.plot(bbr_server['Second'], bbr_server['Retransmissions'], label='BBR Server', color='blue', linestyle='--', alpha=0.7)
     ax3.plot(cubic_client['Second'], cubic_client['Retransmissions'], label='CUBIC Client', color='red', alpha=0.7)
     ax3.plot(cubic_server['Second'], cubic_server['Retransmissions'], label='CUBIC Server', color='red', linestyle='--', alpha=0.7)
-    ax3.plot(quic_client['Second'], quic_client['Retransmissions'], label='QUIC Client', color='green', alpha=0.8)
-    ax3.plot(quic_server['Second'], quic_server['Retransmissions'], label='QUIC Server', color='green', linestyle='--', alpha=0.8)
-    ax3.set_title('Retransmissions')
+    ax3.set_title('Retransmissions - TCP Protocols')
     ax3.set_xlabel('Second')
     ax3.set_ylabel('Count')
     ax3.legend()
@@ -98,14 +94,14 @@ def plot_comparison(results_dir: Path):
     ax4.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    out_png = results_dir / 'bbr_cubic_quic_comparison.png'
+    out_png = results_dir / 'protocol_comparison.png'
     plt.savefig(out_png, dpi=300, bbox_inches='tight')
     plt.show()
 
     print(f"Plot saved to: {out_png}")
 
 def _parse_args():
-    parser = argparse.ArgumentParser(description='Plot BBR vs CUBIC comparison using files in results/')
+    parser = argparse.ArgumentParser(description='Plot BBR vs CUBIC vs QUIC comparison using files in results/')
     parser.add_argument('--results', '-r', type=str, default=None,
                         help='Path to results directory (default: repo/results)')
     return parser.parse_args()
